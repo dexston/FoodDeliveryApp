@@ -1,5 +1,5 @@
 //
-//  MainViewPresenter.swift
+//  MenuViewPresenter.swift
 //  FoodDeliveryApp
 //
 //  Created by Admin on 13.10.2022.
@@ -8,50 +8,55 @@
 import Foundation
 import UIKit
 
-protocol MainViewProtocol: AnyObject {
+protocol MenuViewProtocol: AnyObject {
     func scrollToRow(at row: Int)
-    func updateCategories()
-    func bannersFetched()
-    func success()
+    func setupCategories()
+    func updateCategories(with currentCategory: String)
+    func updateBanners(with image: UIImage)
+    func updateTable()
     func failure(_ error: Error)
 }
 
-protocol MainViewPresenterProtocol: AnyObject {
-    init(view: MainViewProtocol, networkService: NetworkServiceProtocol)
+protocol MenuViewPresenterProtocol: AnyObject {
+    init(view: MenuViewProtocol, networkService: NetworkServiceProtocol)
     func fetchFoodData()
     func fetchFoodImage(for food: Food)
     func categoryButtonPressed(with foodType: String)
     func tableViewDidScroll(index: IndexPath) 
     var foodData: [Food]? { get set }
     var foodImages: [Int:UIImage] { get set }
-    var bannerImages: [UIImage] { get set }
     var categories: [CategoryItem] { get set }
     var currentCategory: String { get set }
 }
 
-class MainViewPresenter: MainViewPresenterProtocol {
-    weak var view: MainViewProtocol?
+class MenuViewPresenter: MenuViewPresenterProtocol {
+    
+    weak var view: MenuViewProtocol?
     let networkService: NetworkServiceProtocol
+    
+    var foodImages: [Int:UIImage]
     var foodData: [Food]? {
         didSet {
             getCategories()
         }
     }
-    var foodImages: [Int:UIImage]
-    var bannerImages: [UIImage]
-    var categories: [CategoryItem] {
+    
+    private var categoriesDic: [String: Int] = [:]
+    var currentCategory: String = "pizza" {
         didSet {
-            view?.updateCategories()
+            view?.updateCategories(with: currentCategory)
         }
     }
-    var categoriesDic: [String: Int] = [:]
-    var currentCategory: String = "pizza"
+    var categories: [CategoryItem] {
+        didSet {
+            view?.setupCategories()
+        }
+    }
     
-    required init(view: MainViewProtocol, networkService: NetworkServiceProtocol) {
+    required init(view: MenuViewProtocol, networkService: NetworkServiceProtocol) {
         self.view = view
         self.networkService = networkService
         foodImages = [:]
-        bannerImages = []
         categories = []
         fetchFoodData()
         fetchBannerImages()
@@ -64,7 +69,7 @@ class MainViewPresenter: MainViewPresenterProtocol {
                 switch result {
                 case .success(let data):
                     self.foodData = data
-                    self.view?.success()
+                    self.view?.updateTable()
                 case .failure(let error):
                     self.view?.failure(error)
                 }
@@ -79,7 +84,7 @@ class MainViewPresenter: MainViewPresenterProtocol {
                 switch result {
                 case .success(let data):
                     self.foodImages[food.id] = data
-                    self.view?.success()
+                    self.view?.updateTable()
                 case .failure(let error):
                     self.view?.failure(error)
                 }
@@ -87,17 +92,16 @@ class MainViewPresenter: MainViewPresenterProtocol {
         }
     }
     
-    func fetchBannerImages() {
+    private func fetchBannerImages() {
         networkService.getBannerImages { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                self.bannerImages.append(result)
-                self.view?.bannersFetched()
+                self.view?.updateBanners(with: result)
             }
         }
     }
     
-    func getCategories() {
+    private func getCategories() {
         guard let foodData = foodData else { return }
         var categoriesDic: [String: Int] = [:]
         var categoriesArray: [CategoryItem] = []
@@ -122,7 +126,6 @@ class MainViewPresenter: MainViewPresenterProtocol {
         if let foodType = foodData?[index.row].foodType {
             if foodType != currentCategory {
                 currentCategory = foodType
-                view?.updateCategories()
             }
         }
     }

@@ -42,24 +42,24 @@ extension CategoryButton {
         
         switch self.state {
         case .normal:
-            strokeColor = UIColor(named: "SecondaryAccentColor")!
-            foregroundColor = UIColor(named: "SecondaryAccentColor")!
+            strokeColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.4)
+            foregroundColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.4)
             backgroundColor = .clear
         case .highlighted:
             strokeColor = UIColor(named: "MainAccentColor")!
             foregroundColor = UIColor(named: "MainAccentColor")!
-            backgroundColor = UIColor(named: "SecondaryAccentColor")!
+            backgroundColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.4)
         case .selected:
             strokeColor = .clear
             foregroundColor = UIColor(named: "MainAccentColor")!
-            backgroundColor = UIColor(named: "SecondaryAccentColor")!
+            backgroundColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.2)
         case [.selected, .highlighted]:
             strokeColor = UIColor(named: "MainAccentColor")!
             foregroundColor = UIColor(named: "MainAccentColor")!
-            backgroundColor = UIColor(named: "SecondaryAccentColor")!
+            backgroundColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.4)
         default:
-            strokeColor = UIColor(named: "SecondaryAccentColor")!
-            foregroundColor = UIColor(named: "SecondaryAccentColor")!
+            strokeColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.4)
+            foregroundColor = UIColor(named: "MainAccentColor")!.withAlphaComponent(0.4)
             backgroundColor = .clear
         }
         
@@ -72,34 +72,3 @@ extension CategoryButton {
         self.configuration = updatedConfiguration
     }
 }
-
-//extension UIButton.Configuration {
-//    public static func selectedCategoryButton() -> UIButton.Configuration {
-//        var style = UIButton.Configuration.plain()
-//        var background = UIButton.Configuration.plain().background
-//        background.cornerRadius = 20
-//        background.backgroundColor = UIColor(named: "SecondaryAccentColor")
-//        style.background = background
-//
-//        return style
-//    }
-//    public static func outlineAccentColor() -> UIButton.Configuration {
-//        var style = UIButton.Configuration.plain()
-//        var background = UIButton.Configuration.plain().background
-//        background.cornerRadius = 20
-//        background.strokeWidth = 1
-//        background.strokeColor = UIColor(named: "SecondaryAccentColor")
-//        style.background = background
-//
-//        return style
-//    }
-//}
-
-
-//button.setTitle(title, for: .normal)
-//button.configuration = .plain()
-//button.configuration?.background.cornerRadius = 20
-//button.configuration?.baseForegroundColor = UIColor(named: "SecondaryAccentColor")
-//button.heightAnchor.constraint(equalToConstant: 32).isActive = true
-//button.widthAnchor.constraint(equalToConstant: 88).isActive = true
-//button.clipsToBounds = true

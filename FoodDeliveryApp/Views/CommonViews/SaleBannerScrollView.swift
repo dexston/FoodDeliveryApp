@@ -9,8 +9,7 @@ import UIKit
 
 class SaleBannerScrollView: UIView {
     
-    var images: [UIImage]?
-    var totalHeight: CGFloat = 0
+    private var totalHeight: CGFloat = 0
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -20,11 +19,10 @@ class SaleBannerScrollView: UIView {
         super.init(coder: coder)
     }
 
-    init(height: CGFloat, images: [UIImage]) {
+    init(height: CGFloat) {
         let frame = CGRect(x: .zero, y: .zero, width: .zero, height: height)
         super.init(frame: frame)
         totalHeight = height
-        self.images = images
         setupView()
     }
     
@@ -42,17 +40,13 @@ class SaleBannerScrollView: UIView {
         let scroll = UIScrollView()
         scroll.prepareForAutoLayout()
         scroll.addSubview(stackView)
+        scroll.backgroundColor = .secondarySystemBackground
         scroll.showsHorizontalScrollIndicator = false
         return scroll
     }()
     
     private func setupView() {
         addSubview(scrollView)
-        if let images = images {
-            for image in images {
-                stackView.addArrangedSubview(setupBanner(with: image))
-            }
-        }
         setupConstraints()
     }
     
@@ -81,5 +75,9 @@ class SaleBannerScrollView: UIView {
         view.widthAnchor.constraint(equalToConstant: 300).isActive = true
         view.clipsToBounds = true
         return view
+    }
+    
+    func update(with image: UIImage) {
+        stackView.addArrangedSubview(setupBanner(with: image))
     }
 }

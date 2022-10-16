@@ -1,5 +1,5 @@
 //
-//  MainViewController.swift
+//  MenuViewController.swift
 //  FoodDeliveryApp
 //
 //  Created by Admin on 13.10.2022.
@@ -7,35 +7,26 @@
 
 import UIKit
 
-class MainViewController: UIViewController {
+class MenuViewController: UIViewController {
     
-    var presenter: MainViewPresenterProtocol?
+    var presenter: MenuViewPresenterProtocol?
     
-    private var headerView = UIView()
-    private var categoriesView: CategoriesScrollView?
-    private var tableView = UITableView()
+    private var headerView = MenuViewHeader(height: 46)
+    private var bannersView = SaleBannerScrollView(height: 136)
+    private var categoriesView = CategoriesScrollView(height: 68)
+    private var tableView = MainTableView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupHeaderView()
         setupTableView()
         view.addSubview(headerView)
         view.addSubview(tableView)
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .secondarySystemBackground
         setupConstraints()
     }
     
-    private func setupHeaderView() {
-        headerView.prepareForAutoLayout()
-        headerView.backgroundColor = .systemBackground
-    }
-    
     private func setupTableView() {
-        tableView.prepareForAutoLayout()
-        tableView.sectionHeaderHeight = 68
-        tableView.sectionHeaderTopPadding = .zero
-        tableView.separatorInset = .zero
-        tableView.register(FoodItemTableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.tableHeaderView = bannersView
         tableView.dataSource = self
         tableView.delegate = self
     }
@@ -45,7 +36,8 @@ class MainViewController: UIViewController {
             headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             headerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             headerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            headerView.heightAnchor.constraint(equalToConstant: 46),
+            headerView.heightAnchor.constraint(equalToConstant: headerView.frame.height),
+            //
             tableView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
@@ -55,36 +47,33 @@ class MainViewController: UIViewController {
     }
 }
 
-extension MainViewController: UITableViewDataSource {
+extension MenuViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return presenter?.foodData?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! FoodItemTableViewCell
-        if let foodItem = presenter?.foodData?[indexPath.row] {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! MainTableViewCell
+        guard let presenter = presenter else { return cell }
+        if let foodItem = presenter.foodData?[indexPath.row] {
             cell.foodItem = foodItem
-            if let image = presenter?.foodImages[foodItem.id] {
+            if let image = presenter.foodImages[foodItem.id] {
                 cell.foodImage = image
             } else {
-                presenter?.fetchFoodImage(for: foodItem)
+                presenter.fetchFoodImage(for: foodItem)
             }
         }
         return cell
     }
 }
 
-extension MainViewController: UITableViewDelegate {
+extension MenuViewController: UITableViewDelegate {
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        guard let presenter = presenter else { return UIView() }
-        if categoriesView == nil {
-            categoriesView = CategoriesScrollView(height: 68) { foodType in
-                presenter.categoryButtonPressed(with: foodType)
-            }
-        }
         return categoriesView
     }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let presenter = presenter else { return }
         let contentOffset = tableView.contentOffset
@@ -94,27 +83,28 @@ extension MainViewController: UITableViewDelegate {
     }
 }
 
-extension MainViewController: MainViewProtocol {
+extension MenuViewController: MenuViewProtocol {
+    
     func scrollToRow(at row: Int) {
         let indexPath = IndexPath(row: row, section: 0)
         tableView.scrollToRow(at: indexPath, at: .top, animated: true)
     }
     
-    func updateCategories() {
+    func setupCategories() {
         guard let presenter = presenter else { return }
-        if categoriesView?.categories == nil {
-            categoriesView?.setup(with: presenter.categories, currentCategory: presenter.currentCategory)
-        } else {
-            categoriesView?.update(with: presenter.currentCategory)
-        }
+        categoriesView.setup(with: presenter.categories, currentCategory: presenter.currentCategory,
+                             action: { foodType in presenter.categoryButtonPressed(with: foodType) })
     }
     
-    func bannersFetched() {
-        guard let presenter = presenter else { return }
-        tableView.tableHeaderView = SaleBannerScrollView(height: 136, images: presenter.bannerImages)
+    func updateCategories(with currentCategory: String) {
+        categoriesView.update(with: currentCategory)
     }
     
-    func success() {
+    func updateBanners(with image: UIImage) {
+        bannersView.update(with: image)
+    }
+    
+    func updateTable() {
         tableView.reloadData()
     }
     

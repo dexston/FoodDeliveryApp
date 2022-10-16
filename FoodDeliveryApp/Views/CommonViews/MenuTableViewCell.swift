@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FoodItemTableViewCell: UITableViewCell {
+class MainTableViewCell: UITableViewCell {
     
     var foodItem: Food? {
         didSet {
@@ -65,11 +65,7 @@ class FoodItemTableViewCell: UITableViewCell {
     private let orderButton: UIButton = {
         let button = UIButton()
         button.prepareForAutoLayout()
-        button.configuration = .plain()
-        button.configuration?.background.cornerRadius = 6
-        button.configuration?.background.strokeWidth = 1
-        button.configuration?.background.strokeColor = UIColor(named: "MainAccentColor")
-        button.configuration?.baseForegroundColor = UIColor(named: "MainAccentColor")
+        button.configuration = .outlineAccentColor()
         return button
     }()
     
@@ -86,6 +82,7 @@ class FoodItemTableViewCell: UITableViewCell {
         descriptionViewContainer.addSubview(descriptionLabel)
         descriptionViewContainer.addSubview(orderButton)
         contentView.addSubview(descriptionViewContainer)
+        backgroundColor = .systemBackground
         setupConstraints()
     }
     
@@ -112,9 +109,24 @@ class FoodItemTableViewCell: UITableViewCell {
             
             orderButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 16),
             orderButton.heightAnchor.constraint(equalToConstant: 32),
+            orderButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 87),
             orderButton.trailingAnchor.constraint(equalTo: descriptionViewContainer.trailingAnchor),
             orderButton.bottomAnchor.constraint(equalTo: descriptionViewContainer.bottomAnchor)
         ]
         NSLayoutConstraint.activate(constraints)
+    }
+}
+
+extension UIButton.Configuration {
+    public static func outlineAccentColor() -> UIButton.Configuration {
+        var style = UIButton.Configuration.plain()
+        var background = UIButton.Configuration.plain().background
+        background.cornerRadius = 6
+        background.strokeWidth = 1
+        background.strokeColor = UIColor(named: "MainAccentColor")
+        style.baseForegroundColor = UIColor(named: "MainAccentColor")
+        style.background = background
+        
+        return style
     }
 }

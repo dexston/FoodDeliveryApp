@@ -9,10 +9,10 @@ import UIKit
 
 class CategoriesScrollView: UIView {
     
-    var categories: [CategoryItem]?
-    var buttons: [CategoryButton] = []
-    var totalHeight: CGFloat = 0
-    var action: (String) -> () = { text in print(text) }
+    private var categories: [CategoryItem]?
+    private var buttons: [CategoryButton] = []
+    private var totalHeight: CGFloat = 0
+    private var action: (String) -> () = { text in print(text) }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,11 +22,10 @@ class CategoriesScrollView: UIView {
         super.init(coder: coder)
     }
 
-    init(height: CGFloat, action: @escaping (String) -> ()) {
+    init(height: CGFloat) {
         let frame = CGRect(x: .zero, y: .zero, width: .zero, height: height)
         super.init(frame: frame)
         totalHeight = height
-        self.action = action
         setupView()
     }
     lazy private var stackView: UIStackView = {
@@ -49,7 +48,7 @@ class CategoriesScrollView: UIView {
 
     private func setupView() {
         addSubview(scrollView)
-        backgroundColor = .systemBackground
+        backgroundColor = .secondarySystemBackground
         setupConstraints()
     }
     
@@ -77,7 +76,7 @@ class CategoriesScrollView: UIView {
     private func setupCategoryButton(with item: CategoryItem) -> CategoryButton {
         let button = CategoryButton()
         let title = item.title
-        button.setTitle(title, for: .normal)
+        button.setTitle(title.localizedCapitalized, for: .normal)
         
         button.addAction(UIAction { [weak self] _ in
             guard let self = self else { return }
@@ -87,11 +86,12 @@ class CategoriesScrollView: UIView {
         return button
     }
     
-    func setup(with categories: [CategoryItem], currentCategory: String) {
+    func setup(with categories: [CategoryItem], currentCategory: String, action: @escaping (String) -> ()) {
         for category in categories {
             buttons.append(setupCategoryButton(with: category))
         }
         self.categories = categories
+        self.action = action
         setupCategories()
         markCategoryAsSelected(with: currentCategory)
     }
@@ -102,7 +102,7 @@ class CategoriesScrollView: UIView {
     
     private func markCategoryAsSelected(with currentCategory: String) {
         buttons.forEach { button in
-            button.isSelected = button.titleLabel!.text == currentCategory
+            button.isSelected = button.titleLabel?.text?.lowercased() == currentCategory.lowercased()
         }
     }
 }
